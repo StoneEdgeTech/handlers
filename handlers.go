@@ -21,7 +21,7 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/monsooncommerce/log"
+	"github.com/stoneedgetech/log"
 )
 
 func LogWrapper(handlerToWrap http.HandlerFunc, logger *log.Log) http.HandlerFunc {

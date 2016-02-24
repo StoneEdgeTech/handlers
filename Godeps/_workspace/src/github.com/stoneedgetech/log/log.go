@@ -3,7 +3,9 @@ package log
 import (
 	"fmt"
 	"io"
+	"net/http"
 	"os"
+	"strings"
 	"sync"
 )
 
@@ -14,6 +16,20 @@ type Log struct {
 	mu        sync.Mutex
 	threshold Level
 	writer    io.Writer
+}
+
+type LogHandler interface {
+	Handle(http.ResponseWriter, error, int)
+}
+
+type LogHandlerImpl struct {
+	Logger *Log
+}
+
+func (l *LogHandlerImpl) Handle(w http.ResponseWriter, err error, code int) {
+	l.Logger.Error(err.Error())
+	w.Write([]byte(err.Error()))
+	w.WriteHeader(code)
 }
 
 const (
@@ -51,52 +67,52 @@ func New(writer io.Writer, threshold Level) *Log {
 }
 
 func (log *Log) Debug(args ...interface{}) {
-	log.write(Debug, args)
+	log.write(Debug, args...)
 }
 
 func (log *Log) Debugf(format string, args ...interface{}) {
-	log.write(Debug, fmt.Sprintf(format, args))
+	log.write(Debug, fmt.Sprintf(format, args...))
 }
 
 func (log *Log) Info(args ...interface{}) {
-	log.write(Info, args)
+	log.write(Info, args...)
 }
 
 func (log *Log) Infof(format string, args ...interface{}) {
-	log.write(Info, fmt.Sprintf(format, args))
+	log.write(Info, fmt.Sprintf(format, args...))
 }
 
 func (log *Log) Notice(args ...interface{}) {
-	log.write(Notice, args)
+	log.write(Notice, args...)
 }
 
 func (log *Log) Noticef(format string, args ...interface{}) {
-	log.write(Notice, fmt.Sprintf(format, args))
+	log.write(Notice, fmt.Sprintf(format, args...))
 }
 
 func (log *Log) Warning(args ...interface{}) {
-	log.write(Warning, args)
+	log.write(Warning, args...)
 }
 
 func (log *Log) Warningf(format string, args ...interface{}) {
-	log.write(Warning, fmt.Sprintf(format, args))
+	log.write(Warning, fmt.Sprintf(format, args...))
 }
 
 func (log *Log) Error(args ...interface{}) {
-	log.write(Error, args)
+	log.write(Error, args...)
 }
 
 func (log *Log) Errorf(format string, args ...interface{}) {
-	log.write(Error, fmt.Sprintf(format, args))
+	log.write(Error, fmt.Sprintf(format, args...))
 }
 
 func (log *Log) Fatal(args ...interface{}) {
-	log.write(Fatal, args)
+	log.write(Fatal, args...)
 	os.Exit(1)
 }
 
 func (log *Log) Fatalf(format string, args ...interface{}) {
-	log.write(Fatal, fmt.Sprintf(format, args))
+	log.write(Fatal, fmt.Sprintf(format, args...))
 	os.Exit(1)
 }
 
@@ -112,9 +128,30 @@ func (log *Log) write(level Level, args ...interface{}) {
 	log.mu.Lock()
 	defer log.mu.Unlock()
 
-	fmt.Fprint(log.writer, log.Format(level, args))
+	fmt.Fprint(log.writer, log.Format(level, args...))
 }
 
 func (level Level) String() string {
 	return levelStrings[level]
+}
+
+func GetLogLevel(levelInput string) Level {
+	switch strings.ToLower(levelInput) {
+	case "fatal":
+		return Fatal
+	case "error":
+		return Error
+	case "warning":
+		return Warning
+	case "notice":
+		return Notice
+	case "info":
+		return Info
+	default:
+		return Debug
+	}
+}
+
+func (log *Log) Threshold() Level{
+	return log.threshold
 }

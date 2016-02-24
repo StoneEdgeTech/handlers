@@ -15,7 +15,7 @@ package main
 
 import (
 	"os"
-   "github.com/monsooncommerce/log"
+   "github.com/stoneedgetech/log"
 )
 
 func main() {
@@ -32,8 +32,8 @@ func main() {
 Output:
 
 ```
-2013-10-02T13:41:43Z host.monsooncommerce.com myapp[25702]: ERROR [This is an error message]
-2013-10-02T13:41:44Z host.monsooncommerce.com myapp[25702]: ERROR [This is a formatted error message: [fetched an error message]]
+2013-10-02T13:41:43Z host.stoneedge.com myapp[25702]: ERROR [This is an error message]
+2013-10-02T13:41:44Z host.stoneedge.com myapp[25702]: ERROR [This is a formatted error message: [fetched an error message]]
 ```
 
 ## Custom Formatter
@@ -42,7 +42,7 @@ package main
 
 import (
 	"os"
-   "github.com/monsooncommerce/log"
+   "github.com/stoneedgetech/log"
 )
 
 type CustomFormat struct {
